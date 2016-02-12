@@ -13,6 +13,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
@@ -25,21 +26,31 @@ public final class ResultsControllerTest {
     private final MockMvc mockMvc = standaloneSetup(this.resultsController).build();
 
     @Test
-    public void saveMvc() throws Exception {
+    public void testResultsPostAPI() throws Exception {
         this.mockMvc.perform(post("/results")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"winner\": \"test-winner\", \"loser\": \"test-loser\", \"match_id\": \"test-match-id\"}"))
-                .andExpect(status().isCreated());
-
-        verify(this.resultRepository).saveAndFlush(any(Result.class));
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(content().string("{\"winner\":\"test-winner\",\"loser\":\"test-loser\",\"match_id\":\"test-match-id\"}"));
     }
 
     @Test
-    public void saveUnit() {
-        ResponseEntity<Result> response = this.resultsController.save(
-                new Result("test-winner", "test-loser", "test-match-id"));
+    public void testSaveResult() {
+        Result result = new Result("test-winner", "test-loser", "test-match-id");
+        ResponseEntity<Result> response = this.resultsController.save(result);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(response.getBody(), result);
+    }
+
+    @Test
+    public void testResultIsPersisted_whenSaving() throws Exception {
+        Result result = new Result("test-winner", "test-loser", "test-match-id");
+
+        this.resultsController.save(result);
+
         verify(this.resultRepository).saveAndFlush(any(Result.class));
     }
 }
+
