@@ -1,7 +1,7 @@
 app.iml
 build
-.idea/libraries
-.idea/tasks.xml
-.idea/workspace.xml
+.idea/
 tags
 target
+.DS_Store
+*.iml
